@@ -1,0 +1,84 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# OS
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Test & Coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+
+# IDEs & Editors
+*.code-workspace
+.project
+.pydevproject
+
+# macOS
+.vscode-settings
+.venv/
+venv/
+ENV/
+env/
+
+# Project specific test files
+test_*.py
+debug_*.py
+*_test.py
+*check_file_sizes.py
+*create_backup.py
+*verify_all_fixes.py
+*.log
+
+# Temporary/backup files
+*.bak
+*.tmp
+*~
+moved.txt
+newfile.txt
+source.txt
+text_read.txt/
+large_files_report.txt
+LargeFilesReport.csv
+
+# Build artifacts
+folder/
+name/
+NewFolder/
+pro/
+projects/
+
+# Documentation artifacts
+FIX_LOG.md
+FIX_MULTI_STEP_PLAN.md
+ADVANCED_FEATURES.md
