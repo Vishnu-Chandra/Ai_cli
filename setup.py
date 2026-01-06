@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="ai-cli-llm",  
-    version="2.0.0",
+    version="2.0.1",
     author="Your Name",
     description="AI-powered CLI assistant with Gemini LLM command generation and human confirmation",
     long_description=open("README.md", encoding="utf-8").read(),
