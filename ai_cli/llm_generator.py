@@ -83,6 +83,10 @@ RULES:
 5. If the request is unclear or dangerous, still provide a command but set appropriate risk_level and explain concerns in the explanation.
 
 6. NEVER include markdown formatting. ONLY output raw JSON.
+
+7. For PowerShell, always generate single-line commands using pipes (|) for file search/output tasks. Do not use variables for multi-step operations. For example, use:
+   Get-ChildItem -Recurse -File | Where-Object { $_.Length -gt 10MB } | Out-File -FilePath "large_files.txt"
+   instead of using variables like $largeFiles in multiple steps.
 """
 
     def __init__(self, backend: str = "gemini", model: str = None, api_key: str = None, base_url: str = None, context_manager=None):
@@ -654,6 +658,20 @@ class FallbackCommandGenerator:
     def generate_command(self, user_input: str) -> CommandProposal:
         """Generate command using simple pattern matching"""
         input_lower = user_input.lower()
+        
+        # Special pattern for 'find files larger than X and save to file'
+        import re
+        match = re.search(r'find files larger than (\d+)([kmg]b)?', input_lower)
+        if match and ("save" in input_lower or "output" in input_lower or "list" in input_lower):
+            size = match.group(1)
+            unit = match.group(2) or "MB"
+            size_str = f"{size}{unit.upper()}"
+            command = f"Get-ChildItem -Recurse -File | Where-Object {{ $_.Length -gt {size_str} }} | Out-File -FilePath 'large_files.txt'"
+            return CommandProposal(
+                command=command,
+                risk_level="low",
+                explanation=f"Finds all files larger than {size_str} and saves the list to large_files.txt."
+            )
         
         for pattern, commands in self.PATTERNS.items():
             if pattern in input_lower:

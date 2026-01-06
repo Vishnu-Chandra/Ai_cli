@@ -1,0 +1,5 @@
+Get-History
+node -v
+code
+tree /F
+git status

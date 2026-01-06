@@ -147,6 +147,27 @@ class CommandPlanner:
             else:
                 print("Please enter 'yes', 'no', or 'review'")
     
+    def try_merge_powershell_pipeline(self, plan: Plan) -> Optional[str]:
+        """
+        If all steps in the plan are PowerShell pipeline components, merge them into a single command.
+        Returns the merged command string, or None if not mergeable.
+        """
+        # Only merge if all steps are simple commands and not using variables
+        pipeline_cmds = []
+        for step in plan.steps:
+            # Exclude steps that use variables or are not pipeline components
+            if (
+                '$' in step.command or
+                'Set-Variable' in step.command or
+                '=' in step.command.split()[0]  # assignment
+            ):
+                return None
+            # Only allow known pipeline commands
+            pipeline_cmds.append(step.command.strip())
+        # Merge with |
+        merged = ' | '.join(pipeline_cmds)
+        return merged if len(pipeline_cmds) > 1 else None
+
     def execute_plan(self, plan: Plan, confirm_each_step: bool = False) -> bool:
         """
         Execute a multi-step plan.
@@ -160,6 +181,28 @@ class CommandPlanner:
         """
         print(f"\n🚀 Executing plan: {plan.description}")
         print("="*70)
+        
+        # Try to auto-merge PowerShell pipeline steps
+        merged_pipeline = self.try_merge_powershell_pipeline(plan)
+        if merged_pipeline:
+            print("\n🔗 Auto-merged PowerShell pipeline detected. Executing as a single command:")
+            print(f"   {merged_pipeline}\n")
+            result = self.executor.execute(merged_pipeline)
+            if result.success:
+                print("✅ Pipeline command completed successfully")
+            else:
+                print(f"❌ Pipeline command failed: {result.stderr or result.stdout}")
+            # Mark all steps as completed or failed
+            for step in plan.steps:
+                step.status = StepStatus.COMPLETED if result.success else StepStatus.FAILED
+            # Print summary
+            print("\n" + "="*70)
+            print("📊 PLAN EXECUTION SUMMARY")
+            print("="*70)
+            print(f"✅ Completed: {len(plan.steps) if result.success else 0}/{len(plan.steps)}")
+            if not result.success:
+                print(f"❌ Failed: {len(plan.steps)}")
+            return result.success
         
         completed_steps = []
         

@@ -28,10 +28,18 @@ export GEMINI_API_KEY="your_api_key_here"
 python -m ai_cli.main
 ```
 
+### Fallback Mode (Offline)
+You can switch to offline fallback mode at any time by typing:
+```bash
+/mode fallback
+```
+This disables LLM and uses pattern-based command generation locally (no API required).
+
 That's it! Start typing natural language commands like:
 - `create folder named projects`
 - `show all files`
 - `delete test.txt`
+- `/mode fallback` (to switch to offline mode)
 
 ---
 
@@ -96,6 +104,12 @@ That's it! Start typing natural language commands like:
 
 ```bash
 ai-cli
+```
+
+You can switch between LLM and fallback modes at any time:
+```
+> /mode fallback   # Switch to offline mode
+> /mode llm        # Switch back to Gemini LLM
 ```
 
 Then describe what you want to do:
@@ -166,6 +180,20 @@ Recent commands:
 Undo which? (1): 1
 ✓ Command reverted: file.bak → file.txt
 ```
+
+## Command History
+
+AI CLI now tracks all commands executed in its own internal history file (`ai_cli_history.txt`).
+
+- To view your AI CLI command history, type:
+
+  ```
+  show ai-cli history
+  ```
+
+- This will display a numbered list of all commands run via the AI CLI (not PowerShell session history).
+
+- The history file is stored in the project root and is persistent across sessions.
 
 ## Project Structure
 

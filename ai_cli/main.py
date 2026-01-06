@@ -1,4 +1,3 @@
-
 """
 AI CLI - Clean LLM + Confirmation Flow
 
@@ -247,6 +246,29 @@ def get_confirmation(safety_risk: RiskLevel, user_input: str = "") -> bool:
 # ═══════════════════════════════════════════════════════════════════════
 # MAIN APPLICATION
 # ═══════════════════════════════════════════════════════════════════════
+HISTORY_FILE = "ai_cli_history.txt"
+
+def append_to_history(command: str):
+    try:
+        with open(HISTORY_FILE, "a", encoding="utf-8") as f:
+            f.write(command + "\n")
+    except Exception:
+        pass
+
+def show_ai_cli_history():
+    print("\n📜 AI CLI Command History:")
+    try:
+        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            if not lines:
+                print("   (No commands executed yet)")
+            else:
+                for i, line in enumerate(lines, 1):
+                    print(f"   {i}. {line.strip()}")
+    except FileNotFoundError:
+        print("   (No history file found)")
+    print()
+
 def process_settings_command(user_input: str) -> bool:
     """
     Process settings commands (return True if handled)
@@ -340,6 +362,10 @@ def main():
         
         if user_lower in ['help', '/help', '?']:
             print_help()
+            continue
+        
+        if user_lower in ['show ai-cli history', 'ai-cli history', 'cli history', 'show history']:
+            show_ai_cli_history()
             continue
         
         # Undo command - MUST be checked before LLM processing
@@ -516,6 +542,10 @@ def main():
         
         # Update working directory context
         context_manager.update_directory(executor.working_dir)
+        
+        # After command execution (success or fail), append to history
+        if proposal.command:
+            append_to_history(proposal.command)
 
 if __name__ == "__main__":
     main()
