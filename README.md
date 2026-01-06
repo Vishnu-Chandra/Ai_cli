@@ -2,6 +2,39 @@
 
 AI-powered command-line assistant that converts natural language into safe shell commands using Gemini LLM with human-in-the-loop confirmation.
 
+## 🚀 Quick Start
+
+### Install via pip
+```bash
+pip install ai-cli-llm==2.0.1
+```
+
+### Set your API Key
+
+**Windows (PowerShell):**
+```powershell
+$env:GEMINI_API_KEY = "your_api_key_here"
+```
+
+**Linux/macOS:**
+```bash
+export GEMINI_API_KEY="your_api_key_here"
+```
+
+> Get your free Gemini API key at [ai.google.com](https://ai.google.com)
+
+### Run the CLI
+```bash
+python -m ai_cli.main
+```
+
+That's it! Start typing natural language commands like:
+- `create folder named projects`
+- `show all files`
+- `delete test.txt`
+
+---
+
 ## Features
 
 ✨ **Core Capabilities**
@@ -19,7 +52,7 @@ AI-powered command-line assistant that converts natural language into safe shell
 - ⚙️ **Smart Autocomplete**: Context-aware command suggestions
 - 🌐 **Multi-LLM Support**: Works with Gemini API or local Ollama instances
 
-## Installation
+## Installation (From Source)
 
 ### Prerequisites
 - **Python 3.10+**
@@ -54,7 +87,7 @@ AI-powered command-line assistant that converts natural language into safe shell
 
 4. **Verify installation**
    ```bash
-   ai-cli
+   python -m ai_cli.main
    ```
 
 ## Usage
