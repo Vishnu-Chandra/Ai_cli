@@ -1,6 +1,6 @@
-# AI CLI Assistant
+# AI CLI Assistant (LLM Powered)
 
-An intelligent command-line interface powered by **Google Gemini AI** (with Ollama fallback) that understands natural language and executes complex commands with safety checks and undo capabilities.
+AI-powered command-line assistant that converts natural language into safe shell commands using Gemini LLM with human-in-the-loop confirmation.
 
 ## Features
 
