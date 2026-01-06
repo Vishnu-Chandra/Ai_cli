@@ -181,8 +181,40 @@ def print_proposal(proposal: CommandProposal, safety_risk: RiskLevel):
     print("└─────────────────────────────────────────────────────────────┘")
 
 
-def get_confirmation(safety_risk: RiskLevel) -> bool:
-    """Get user confirmation for command execution"""
+def show_command_suggestions(user_input: str = ""):
+    """Display contextual command suggestions based on user input"""
+    print("\n💡 Did you mean:")
+    
+    if user_input:
+        # Generate contextual suggestions based on what user typed
+        suggestions = AutocompleteSuggestions.get_suggestions(user_input, os.getcwd())
+        
+        if suggestions:
+            for i, suggestion in enumerate(suggestions[:5], 1):
+                print(f"      {i}. {suggestion}")
+        else:
+            # Default suggestions if no matches
+            _show_default_suggestions()
+    else:
+        _show_default_suggestions()
+    print()
+
+
+def _show_default_suggestions():
+    """Show default command suggestions"""
+    defaults = [
+        "create folder <name>",
+        "show files",
+        "read <filename>",
+        "delete <filename>",
+        "copy <src> to <dest>"
+    ]
+    for i, suggestion in enumerate(defaults, 1):
+        print(f"      {i}. {suggestion}")
+
+
+def get_confirmation(safety_risk: RiskLevel, user_input: str = "") -> bool:
+    """Get user confirmation for command execution with optional help"""
     
     # Auto-confirm for low risk if configured
     if CONFIG['auto_confirm_low_risk'] and safety_risk == RiskLevel.LOW:
@@ -193,11 +225,23 @@ def get_confirmation(safety_risk: RiskLevel) -> bool:
     if safety_risk in [RiskLevel.HIGH, RiskLevel.CRITICAL]:
         print("\n⚠️  WARNING: This is a high-risk command!")
     
-    try:
-        response = input("\n▶ Execute this command? (yes/no): ").strip().lower()
-        return response in ['yes', 'y']
-    except (EOFError, KeyboardInterrupt):
-        return False
+    while True:
+        try:
+            response = input("\n▶ Execute this command? (yes/no/help): ").strip().lower()
+            
+            if response in ['yes', 'y']:
+                return True
+            elif response in ['no', 'n']:
+                return False
+            elif response in ['help', '?']:
+                show_command_suggestions(user_input)
+                continue
+            else:
+                print("   Please enter 'yes', 'no', or 'help'")
+                continue
+                
+        except (EOFError, KeyboardInterrupt):
+            return False
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -438,7 +482,7 @@ def main():
         # ─────────────────────────────────────────────────────────────
         # STEP 4: User Confirmation (MANDATORY)
         # ─────────────────────────────────────────────────────────────
-        if not get_confirmation(final_risk):
+        if not get_confirmation(final_risk, user_input):
             print("🚫 Command cancelled.")
             continue
         

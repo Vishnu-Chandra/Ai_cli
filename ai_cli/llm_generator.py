@@ -605,16 +605,51 @@ class FallbackCommandGenerator:
         "where am i": {"win": "cd", "unix": "pwd"},
         "make folder": {"win": "mkdir", "unix": "mkdir"},
         "create folder": {"win": "mkdir", "unix": "mkdir"},
+        "create directory": {"win": "mkdir", "unix": "mkdir"},
+        "make directory": {"win": "mkdir", "unix": "mkdir"},
+        "create file": {"win": "type nul >", "unix": "touch"},
+        "make file": {"win": "type nul >", "unix": "touch"},
         "delete": {"win": "del", "unix": "rm"},
         "remove": {"win": "del", "unix": "rm"},
         "copy": {"win": "copy", "unix": "cp"},
         "move": {"win": "move", "unix": "mv"},
         "read": {"win": "type", "unix": "cat"},
-        "show": {"win": "type", "unix": "cat"},
+        "show content": {"win": "type", "unix": "cat"},
     }
+    
+    # Words to remove when extracting the actual argument
+    NOISE_WORDS = [
+        "create", "make", "new", "folder", "directory", "file", 
+        "named", "called", "a", "the", "please", "can", "you",
+        "delete", "remove", "read", "show", "content", "of",
+        "copy", "move", "rename", "to", "from", "list", "all", "files"
+    ]
     
     def __init__(self):
         self.is_windows = platform.system() == "Windows"
+    
+    def _extract_argument(self, user_input: str, pattern: str) -> str:
+        """Extract the actual argument (filename/foldername) from user input"""
+        input_lower = user_input.lower()
+        
+        # Handle "to" for copy/move operations
+        if " to " in input_lower and pattern in ["copy", "move"]:
+            parts = input_lower.split(" to ")
+            source = self._clean_argument(parts[0], pattern)
+            dest = self._clean_argument(parts[1], pattern)
+            return f"{source} {dest}"
+        
+        return self._clean_argument(input_lower, pattern)
+    
+    def _clean_argument(self, text: str, pattern: str) -> str:
+        """Remove noise words and return clean argument"""
+        words = text.split()
+        # Remove pattern words and noise words
+        clean_words = []
+        for word in words:
+            if word.lower() not in self.NOISE_WORDS and word.lower() not in pattern.split():
+                clean_words.append(word)
+        return " ".join(clean_words).strip()
     
     def generate_command(self, user_input: str) -> CommandProposal:
         """Generate command using simple pattern matching"""
@@ -624,13 +659,17 @@ class FallbackCommandGenerator:
             if pattern in input_lower:
                 base_cmd = commands["win"] if self.is_windows else commands["unix"]
                 
-                # Extract potential arguments (simple heuristic)
-                words = user_input.split()
-                args = [w for w in words if not any(p in w.lower() for p in self.PATTERNS.keys())]
+                # Extract the actual argument (folder name, file name, etc.)
+                arg = self._extract_argument(user_input, pattern)
                 
-                command = f"{base_cmd} {' '.join(args)}".strip()
+                # Build final command
+                if arg:
+                    command = f"{base_cmd} {arg}"
+                else:
+                    command = base_cmd
                 
-                risk = "low" if base_cmd in ["dir", "ls", "cd", "pwd", "type", "cat"] else "medium"
+                # Determine risk level
+                risk = "low" if base_cmd in ["dir", "ls", "ls -la", "cd", "pwd", "type", "cat"] else "medium"
                 if base_cmd in ["del", "rm"]:
                     risk = "high"
                 

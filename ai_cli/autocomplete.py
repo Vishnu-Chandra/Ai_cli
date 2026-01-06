@@ -204,26 +204,6 @@ def get_input_with_autocomplete(prompt: str, current_dir: str = ".") -> str:
     
     try:
         user_input = input(prompt).strip()
-        
-        # If no readline, show suggestions and allow selection
-        if not READLINE_AVAILABLE and user_input and len(user_input) >= 3:
-            suggestions = AutocompleteSuggestions.get_suggestions(user_input, current_dir)
-            if suggestions:
-                print(f"   💡 Did you mean:")
-                for i, suggestion in enumerate(suggestions[:5], 1):
-                    print(f"      {i}. {suggestion}")
-                
-                # Ask user to select
-                try:
-                    choice = input(f"   Select (1-{len(suggestions)}, or press Enter to use your input): ").strip()
-                    if choice and choice.isdigit():
-                        idx = int(choice) - 1
-                        if 0 <= idx < len(suggestions):
-                            user_input = suggestions[idx]
-                            print(f"   → Using: {user_input}\n")
-                except (ValueError, IndexError):
-                    pass  # Use original input
-        
         return user_input
     except EOFError:
         return ""
